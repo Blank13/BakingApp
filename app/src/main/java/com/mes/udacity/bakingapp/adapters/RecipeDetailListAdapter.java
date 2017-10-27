@@ -5,11 +5,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mes.udacity.bakingapp.R;
 import com.mes.udacity.bakingapp.listeners.ListItemClickListener;
+import com.mes.udacity.bakingapp.models.Recipe;
 import com.mes.udacity.bakingapp.models.RecipeStep;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -42,7 +45,13 @@ public class RecipeDetailListAdapter extends RecyclerView.Adapter<RecipeDetailLi
             holder.detailTextView.setText(context.getText(R.string.ingredient_detail_text));
         }
         else {
-            holder.detailTextView.setText(steps.get(position - 1).getShortDescription());
+            RecipeStep recipeStep = steps.get(position - 1);
+            holder.detailTextView.setText(recipeStep.getShortDescription());
+            if (recipeStep.getThumbnailURL() != null && !recipeStep.getThumbnailURL().isEmpty()) {
+                holder.detailImageView.setVisibility(View.VISIBLE);
+                Picasso.with(context).load(recipeStep.getThumbnailURL())
+                        .into(holder.detailImageView);
+            }
         }
     }
 
@@ -58,10 +67,12 @@ public class RecipeDetailListAdapter extends RecyclerView.Adapter<RecipeDetailLi
     public class RecipeDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView detailTextView;
+        private ImageView detailImageView;
 
         public RecipeDetailViewHolder(View itemView) {
             super(itemView);
             detailTextView = itemView.findViewById(R.id.recipe_detail_text);
+            detailImageView = itemView.findViewById(R.id.recipe_detail_imageview);
             itemView.setOnClickListener(this);
         }
 

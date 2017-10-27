@@ -2,7 +2,10 @@ package com.mes.udacity.bakingapp.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,8 +16,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.mes.udacity.bakingapp.activities.RecipeListActivity;
 import com.mes.udacity.bakingapp.adapters.RecipeListAdapter;
 import com.mes.udacity.bakingapp.R;
+import com.mes.udacity.bakingapp.idlingresource.SimpleIdlingResource;
 import com.mes.udacity.bakingapp.listeners.ListItemClickListener;
 import com.mes.udacity.bakingapp.listeners.RecipeListListener;
 import com.mes.udacity.bakingapp.models.Recipe;
@@ -38,6 +43,9 @@ public class RecipeListFragment extends Fragment implements RecipeListListener,
     private ProgressBar progressBar;
     private RecipeListAdapter recipeListAdapter;
     private RecipeListViewModel recipeListViewModel;
+
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -74,12 +82,16 @@ public class RecipeListFragment extends Fragment implements RecipeListListener,
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), numberOfRows);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(recipeListAdapter);
+        mIdlingResource = (SimpleIdlingResource) ((RecipeListActivity)getActivity()).getIdlingResource();
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(false);
+        }
         recipeListViewModel.requestRecipesList();
     }
 
@@ -99,12 +111,18 @@ public class RecipeListFragment extends Fragment implements RecipeListListener,
     public void onListReady(List<Recipe> recipes) {
         progressBar.setVisibility(View.GONE);
         recipeListAdapter.updateRecipeList(recipes);
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(true);
+        }
     }
 
     @Override
     public void onError(String message) {
         progressBar.setVisibility(View.GONE);
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(true);
+        }
     }
 
     @Override

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -38,6 +39,7 @@ import com.google.gson.Gson;
 import com.mes.udacity.bakingapp.R;
 import com.mes.udacity.bakingapp.listeners.OnStepChangeListener;
 import com.mes.udacity.bakingapp.models.RecipeStep;
+import com.squareup.picasso.Picasso;
 
 
 /**
@@ -52,6 +54,7 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
     private Button prevButton;
     private TextView shortDescriptionTextView;
     private TextView descriptionTextView;
+    private ImageView stepThumbnailImageView;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private static MediaSessionCompat mMediaSession;
@@ -81,20 +84,12 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.recipe_step_detail_fragment, container, false);
-//        Intent intent = getActivity().getIntent();
         Gson gson = new Gson();
         String stepStr;
-//        if (intent != null && intent.hasExtra(getString(R.string.detail_intent_key))) {
-//            stepStr = intent.getStringExtra(getString(R.string.detail_intent_key));
-//            position = intent.getIntExtra(getString(R.string.position_intent_key), 1);
-//            stepsCount = intent.getIntExtra(getString(R.string.count_intent_key), 1);
-//        }
-//        else {
-            Bundle args = getArguments();
-            stepStr = args.getString(getString(R.string.detail_intent_key));
-            position = args.getInt(getString(R.string.position_intent_key));
-            stepsCount = args.getInt(getString(R.string.count_intent_key));
-//        }
+        Bundle args = getArguments();
+        stepStr = args.getString(getString(R.string.detail_intent_key));
+        position = args.getInt(getString(R.string.position_intent_key));
+        stepsCount = args.getInt(getString(R.string.count_intent_key));
         step = gson.fromJson(stepStr, RecipeStep.class);
 
         nextButton = view.findViewById(R.id.next_button);
@@ -110,6 +105,13 @@ public class RecipeStepFragment extends Fragment implements ExoPlayer.EventListe
         }
         if (descriptionTextView != null) {
             descriptionTextView.setText(step.getDescription());
+        }
+        stepThumbnailImageView = view.findViewById(R.id.step_image_view);
+        if(stepThumbnailImageView != null && step.getThumbnailURL() != null
+                && !step.getThumbnailURL().isEmpty()) {
+            stepThumbnailImageView.setVisibility(View.VISIBLE);
+            Picasso.with(getContext()).load(step.getThumbnailURL())
+                    .into(stepThumbnailImageView);
         }
         mPlayerView = view.findViewById(R.id.playerView);
         String videoUrl = step.getVideoURL();
